@@ -9,31 +9,34 @@
         body {
             align-items: center;
             background: url('image/wallpaper.png') center/cover no-repeat;
+            box-sizing: border-box;
             display: flex;
             font-family: Arial, sans-serif;
             justify-content: center;
             margin: 0;
             min-height: 100vh;
+            min-height: 100svh; /* altura real del viewport en móviles */
+            padding: clamp(12px, 3vw, 24px);
         }
 
         main {
             background: #ffffff transparent;
             border-radius: 16px;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-            padding: 40px 32px;
+            padding: clamp(24px, 5vw, 40px) clamp(16px, 4vw, 32px);
             text-align: center;
-            width: min(90%, 800px);
+            width: min(100%, 800px);
         }
 
         h1 {
             color: #2b59d8;
             margin: 0 0 12px;
-            font: bold 5rem Comic Sans MS, sans-serif;
+            font: bold clamp(2.2rem, 9vw, 5rem) Comic Sans MS, sans-serif;
         }
 
         h2 {
             color: #d8962b;
-            font-size: 3rem;
+            font-size: clamp(1.3rem, 5.5vw, 3rem);
             margin: 0 0 24px;
         }
 
@@ -41,8 +44,8 @@
             border: 2px solid #2f5d50;
             border-radius: 8px;
             box-sizing: border-box;
-            font-size: 4rem;
-            letter-spacing: 0.5rem;
+            font-size: clamp(1.8rem, 8vw, 4rem);
+            letter-spacing: clamp(0.2rem, 1.2vw, 0.5rem);
             padding: 12px;
             text-align: center;
             width: 100%;
@@ -58,7 +61,7 @@
             border-radius: 8px;
             color: white;
             cursor: pointer;
-            font-size: 2rem;
+            font-size: clamp(1.1rem, 4.5vw, 2rem);
             margin-top: 24px;
             padding: 12px 24px;
             transition: background-color 0.3s ease;
