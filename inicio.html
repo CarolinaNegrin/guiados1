@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienvenidos</title>
+    <style>
+        body {
+            align-items: center;
+            background: url('image/wallpaper.png') center/cover no-repeat;
+            display: flex;
+            font-family: Arial, sans-serif;
+            justify-content: center;
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        main {
+            background: #ffffff transparent;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            padding: 40px 32px;
+            text-align: center;
+            width: min(90%, 800px);
+        }
+
+        h1 {
+            color: #2b59d8;
+            margin: 0 0 12px;
+            font: bold 5rem Comic Sans MS, sans-serif;
+        }
+
+        h2 {
+            color: #d8962b;
+            font-size: 3rem;
+            margin: 0 0 24px;
+        }
+
+        input {
+            border: 2px solid #2f5d50;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 4rem;
+            letter-spacing: 0.5rem;
+            padding: 12px;
+            text-align: center;
+            width: 100%;
+        }
+
+        input:focus {
+            outline: 3px solid rgba(47, 93, 80, 0.25);
+        }
+
+        button {
+            background-color: #2b59d8;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            font-size: 2rem;
+            margin-top: 24px;
+            padding: 12px 24px;
+            transition: background-color 0.3s ease;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <form id="form-acceso">
+            <h1>BIENVENIDOS</h1>
+            <h2>INGRESE EL CÓDIGO DE ACCESO</h2>
+            <label for="codigo" hidden>Código de acceso</label>
+            <input id="codigo" name="codigo" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6"
+                minlength="6" placeholder="000000" aria-label="Código de acceso" required>
+            <button type="submit">Enviar Código</button>
+        </form>
+    </main>
+    <script>
+        const CODIGO_CORRECTO = "123456"; // Cambia aquí el código de acceso
+
+        // ---------- Audio ----------
+        let ctx = null;
+        let loopId = null;
+
+        function getCtx() {
+            if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+            if (ctx.state === "suspended") ctx.resume();
+            return ctx;
+        }
+
+        function nota(freq, inicio, dur, tipo, vol) {
+            const c = getCtx();
+            const osc = c.createOscillator();
+            const g = c.createGain();
+            osc.type = tipo;
+            osc.frequency.value = freq;
+            g.gain.setValueAtTime(0.0001, c.currentTime + inicio);
+            g.gain.exponentialRampToValueAtTime(vol, c.currentTime + inicio + 0.03);
+            g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + inicio + dur);
+            osc.connect(g).connect(c.destination);
+            osc.start(c.currentTime + inicio);
+            osc.stop(c.currentTime + inicio + dur + 0.1);
+        }
+
+        // Música de fondo tipo "sala de espera": pad suave de acordes
+        const ACORDES = [
+            [261.63, 329.63, 392.00, 493.88], // Do maj7
+            [220.00, 261.63, 329.63, 392.00], // La m7
+            [174.61, 220.00, 261.63, 349.23], // Fa maj7
+            [196.00, 246.94, 293.66, 349.23]  // Sol 7
+        ];
+        let paso = 0;
+
+        function tocarAcorde() {
+            const c = getCtx();
+            const t = c.currentTime;
+            ACORDES[paso % ACORDES.length].forEach(function (f) {
+                const osc = c.createOscillator();
+                const g = c.createGain();
+                const filtro = c.createBiquadFilter();
+                filtro.type = "lowpass";
+                filtro.frequency.value = 900;
+                osc.type = "triangle";
+                osc.frequency.value = f;
+                osc.detune.value = (Math.random() * 8) - 4; // ligero desenfoque, más cálido
+                g.gain.setValueAtTime(0.0001, t);
+                g.gain.linearRampToValueAtTime(0.05, t + 2.2); // entrada suave
+                g.gain.linearRampToValueAtTime(0.0001, t + 5.5); // salida suave
+                osc.connect(filtro).connect(g).connect(c.destination);
+                osc.start(t);
+                osc.stop(t + 6);
+            });
+            paso++;
+        }
+
+        function iniciarMusica() {
+            if (loopId) return;
+            getCtx();
+            tocarAcorde();
+            loopId = setInterval(tocarAcorde, 4000);
+        }
+
+        function detenerMusica() {
+            if (loopId) { clearInterval(loopId); loopId = null; }
+        }
+
+        // Los navegadores bloquean el audio hasta que hay interacción del usuario
+        document.addEventListener("pointerdown", iniciarMusica, { once: true });
+        document.addEventListener("keydown", iniciarMusica, { once: true });
+
+        function sonidoTriunfo() {
+            detenerMusica();
+            // Arpegio ascendente celebratorio: Do - Mi - Sol - Do alto
+            [523.25, 659.25, 783.99, 1046.50].forEach(function (f, i) {
+                nota(f, i * 0.13, 0.5, "triangle", 0.25);
+            });
+            nota(1046.50, 0.55, 0.9, "triangle", 0.3); // nota final larga
+            nota(1318.51, 0.55, 0.9, "sine", 0.15);    // brillo
+        }
+
+        function sonidoFracaso() {
+            detenerMusica();
+            // Dos tonos graves descendentes estilo "incorrecto"
+            nota(220.00, 0.0, 0.35, "square", 0.15);
+            nota(174.61, 0.30, 0.35, "square", 0.15);
+            nota(110.00, 0.60, 0.8, "sawtooth", 0.15);
+        }
+
+        // ---------- Formulario ----------
+        document.getElementById("form-acceso").addEventListener("submit", function (e) {
+            e.preventDefault();
+            const codigo = document.getElementById("codigo").value.trim();
+            getCtx(); // asegurar que el audio esté activo tras el gesto del usuario
+            let destino;
+            if (codigo === CODIGO_CORRECTO) {
+                sonidoTriunfo();
+                destino = "acceder.html"; // Código correcto
+            } else {
+                sonidoFracaso();
+                destino = "error.html"; // Código incorrecto
+            }
+            setTimeout(function () { window.location.href = destino; }, 1800);
+        });
+    </script>
+</body>
+
+</html>

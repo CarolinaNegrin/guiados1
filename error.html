@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Acceso denegado</title>
+	<style>
+		body {
+			align-items: center;
+			background: url('image/wallpaper.png') center/cover no-repeat;
+			display: flex;
+			font-family: Arial, sans-serif;
+			justify-content: center;
+			margin: 0;
+			min-height: 100vh;
+		}
+
+		main {
+			background: #ffffff transparent;
+			border-radius: 16px;
+			box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+			padding: 40px 32px;
+			text-align: center;
+			width: min(90%, 800px);
+		}
+
+		h1 {
+			color: #ee0505;
+			margin: 0 0 12px;
+            font: bold 5rem Comic Sans MS, sans-serif;
+		}
+
+		h2 {
+			color: #d8962b;
+			font-size: 3rem;
+			margin: 0 0 24px;
+		}
+
+		input {
+			border: 2px solid #2f5d50;
+			border-radius: 8px;
+			box-sizing: border-box;
+			font-size: 4rem;
+			letter-spacing: 0.5rem;
+			padding: 12px;
+			text-align: center;
+			width: 100%;
+		}
+
+		input:focus {
+			outline: 3px solid rgba(47, 93, 80, 0.25);
+		}
+	</style>
+</head>
+<body>
+	<main>
+		<h1>ACCESO DENEGADO</h1>
+		<h2>¡INTENTE DE NUEVO!</h2>
+        <a href="inicio.html">Volver a intentar</a>
+	</main>
+<script>
+	// Sonido de fracaso (tonos graves descendentes)
+	function notaFracaso(c, freq, inicio, dur, tipo, vol) {
+		const osc = c.createOscillator();
+		const g = c.createGain();
+		osc.type = tipo;
+		osc.frequency.value = freq;
+		g.gain.setValueAtTime(0.0001, c.currentTime + inicio);
+		g.gain.exponentialRampToValueAtTime(vol, c.currentTime + inicio + 0.03);
+		g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + inicio + dur);
+		osc.connect(g).connect(c.destination);
+		osc.start(c.currentTime + inicio);
+		osc.stop(c.currentTime + inicio + dur + 0.1);
+	}
+
+	function sonarFracaso() {
+		const c = new (window.AudioContext || window.webkitAudioContext)();
+		notaFracaso(c, 220.00, 0.0, 0.35, "square", 0.15);
+		notaFracaso(c, 174.61, 0.30, 0.35, "square", 0.15);
+		notaFracaso(c, 110.00, 0.60, 0.8, "sawtooth", 0.15);
+	}
+
+	// Si el navegador bloquea el audio automático, se reactiva con el primer toque/tecla
+	let sonando = false;
+	function reproducir() {
+		if (sonando) return;
+		sonando = true;
+		sonarFracaso();
+	}
+	try { reproducir(); } catch (e) { /* el navegador bloqueó el audio */ }
+	document.addEventListener("pointerdown", reproducir, { once: true });
+	document.addEventListener("keydown", reproducir, { once: true });
+</script>
+</body>
+</html>

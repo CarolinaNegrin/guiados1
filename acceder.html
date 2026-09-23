@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Acceso exitoso</title>
+	<style>
+		body {
+			align-items: center;
+			background: url('image/wallpaper.png') center/cover no-repeat;
+			display: flex;
+			font-family: Arial, sans-serif;
+			justify-content: center;
+			margin: 0;
+			min-height: 100vh;
+		}
+
+		main {
+			background: #ffffff transparent;
+			border-radius: 16px;
+			box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+			padding: 40px 32px;
+			text-align: center;
+			width: min(90%, 800px);
+		}
+
+		h1 {
+			color: #11ff00;
+			margin: 0 0 12px;
+            font: bold 5rem Comic Sans MS, sans-serif;
+		}
+
+		h2 {
+			color: #d8962b;
+			font-size: 3rem;
+			margin: 0 0 24px;
+		}
+
+		input {
+			border: 2px solid #2f5d50;
+			border-radius: 8px;
+			box-sizing: border-box;
+			font-size: 4rem;
+			letter-spacing: 0.5rem;
+			padding: 12px;
+			text-align: center;
+			width: 100%;
+		}
+
+		input:focus {
+			outline: 3px solid rgba(47, 93, 80, 0.25);
+		}
+	</style>
+</head>
+<body>
+	<main>
+		<h1>ACCESO EXITOSO</h1>
+		<h2>¡FELICIDADES!</h2>
+	</main>
+<script>
+	// Sonido de triunfo (arpegio ascendente)
+	function notaTriunfo(c, freq, inicio, dur, vol) {
+		const osc = c.createOscillator();
+		const g = c.createGain();
+		osc.type = "triangle";
+		osc.frequency.value = freq;
+		g.gain.setValueAtTime(0.0001, c.currentTime + inicio);
+		g.gain.exponentialRampToValueAtTime(vol, c.currentTime + inicio + 0.03);
+		g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + inicio + dur);
+		osc.connect(g).connect(c.destination);
+		osc.start(c.currentTime + inicio);
+		osc.stop(c.currentTime + inicio + dur + 0.1);
+	}
+
+	function sonarTriunfo() {
+		const c = new (window.AudioContext || window.webkitAudioContext)();
+		[523.25, 659.25, 783.99, 1046.50].forEach(function (f, i) {
+			notaTriunfo(c, f, i * 0.13, 0.5, 0.25);
+		});
+		notaTriunfo(c, 1046.50, 0.55, 0.9, 0.3);
+		notaTriunfo(c, 1318.51, 0.55, 0.9, 0.15);
+	}
+
+	// Si el navegador bloquea el audio automático, se reactiva con el primer toque/tecla
+	let sonando = false;
+	function reproducir() {
+		if (sonando) return;
+		sonando = true;
+		sonarTriunfo();
+	}
+	try { reproducir(); } catch (e) { /* el navegador bloqueó el audio */ }
+	document.addEventListener("pointerdown", reproducir, { once: true });
+	document.addEventListener("keydown", reproducir, { once: true });
+</script>
+</body>
+</html>
